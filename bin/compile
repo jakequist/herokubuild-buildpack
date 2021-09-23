@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+## Setup 
+
+BUILD_DIR="$1"
+CACHE_DIR="$2"
+ENV_DIR="$3"
+
+if [ ! -f "${ENV_DIR}/APP_BASE" ]; then
+    echo "APP_BASE was not set. Aborting"
+    exit 1
+fi
+APP_BASE="$(cat "${ENV_DIR}/APP_BASE")"
+APP_DIR="$BUILD_DIR/$APP_BASE"
+
+
+## Helpers 
+
+shopt -s dotglob
+
+indent() {
+    sed -u 's/^/      /'
+}
+
+JQ="/usr/bin/jq"
+if ! test -f "$JQ"; then
+  curl -Ls https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 > "/usr/bin/jq" \
+      && chmod +x "/usr/bin/jq"
+fi
+
+
+if [[ -f "$APP_DIR/heroku-build.sh" ]]; then
+  echo "Executing $APP_DIR/heroku-build.sh" | indent 
+  source "$APP_DIR/heroku-build.sh"
+fi
